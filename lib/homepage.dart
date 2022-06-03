@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:minesweeper/bomb.dart';
 import 'package:minesweeper/numberbox.dart';
+import 'dart:math';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -13,32 +14,50 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   //variables
-
+  Random random = new Random();
+  int score = 0 ;
   int numberOfSqares = 9 * 9;
   int numberInEachRow = 9;
-  var squareStatus = []; // [numbers of bombs in the particular square,
+  var squareStatus = []; // [количество бомб в определнном квадрате,
   // revealed = true / false]
 
   //bomb locations
-  final List<int> bombLocation =  [4 , 12 , 33];
+  var bombLocation =  [];
+
+  int bombAmount = 3;
 
   bool bombsRevealed = false;
 
   @override
   void initState() {
     super.initState();
-    // init, each square has 0 bombs around, and it's not revealed
+    // инициализация, у каждого квадрата 0 бомб вокруг,
+    // и они не открыты revealed = false
     for(int i = 0; i < numberOfSqares; i++){
       squareStatus.add([0,false]);
+    }
+    bombAmount = random.nextInt(8) + 1;
+
+    for(int i =0 ; i < bombAmount; i++){
+      bombLocation.add(random.nextInt(81));
+
     }
     scanBombs();
   }
   void restartGame (){
     setState(() {
+      bombAmount = random.nextInt(8) + 1;
+      bombLocation.clear();
+      for(int i =0 ; i < bombAmount; i++){
+
+        bombLocation.add(random.nextInt(81));
+
+      }
       bombsRevealed = false;
       for(int i = 0; i < numberOfSqares; i++){
         squareStatus[i][1] = false;
       }
+      scanBombs();
     });
   }
   void revealBoxNumbers (int index){
@@ -224,6 +243,7 @@ class _HomePageState extends State<HomePage> {
                 child: Icon(Icons.refresh),
                 onPressed: (){
             restartGame();
+            score = 0;
             Navigator.pop(context);
           })],
       );
@@ -244,6 +264,7 @@ class _HomePageState extends State<HomePage> {
                   onPressed: (){
                     restartGame();
                     Navigator.pop(context);
+                    score = score + 100;
                   })],
           );
         });
@@ -260,6 +281,15 @@ class _HomePageState extends State<HomePage> {
     if (unreveledBoxes == bombLocation.length){
       playerWon();
     }
+  }
+
+  final bombTextFieldController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    bombTextFieldController.dispose();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -278,6 +308,7 @@ class _HomePageState extends State<HomePage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+
                     Text(bombLocation.length.toString(), style: TextStyle(fontSize: 40)),
                     Text('K A B O O M')
                   ],
@@ -296,8 +327,8 @@ class _HomePageState extends State<HomePage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('0', style: TextStyle(fontSize: 40)),
-                    Text('T I M E')
+                    Text(score.toString() , style: TextStyle(fontSize: 40)),
+                    Text('S C O R E')
                   ],
                 )
               ],
